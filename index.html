@@ -1,7 +1,6 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    
 
 <head>
     <meta charset="UTF-8">
@@ -191,6 +190,54 @@
                 </div>
             </div>
 
+            <div class="panel smart-panel">
+                <div class="panel-heading">
+                    <h2>Smart Traffic Control</h2>
+                    <span class="today-label">AI MODE</span>
+                </div>
+
+                <p class="chart-description">
+                    Traffic-based signal monitoring
+                </p>
+
+                <div class="signal-row">
+                    <div class="signal-info">
+                        <strong>North Road</strong>
+                        <p>Vehicle density</p>
+                    </div>
+                    <span id="northDensity" class="badge red-badge">0 Vehicles</span>
+                </div>
+
+                <div class="signal-row">
+                    <div class="signal-info">
+                        <strong>South Road</strong>
+                        <p>Vehicle density</p>
+                    </div>
+                    <span id="southDensity" class="badge green-badge">0 Vehicles</span>
+                </div>
+
+                <div class="signal-row">
+                    <div class="signal-info">
+                        <strong>East Road</strong>
+                        <p>Vehicle density</p>
+                    </div>
+                    <span id="eastDensity" class="badge yellow-badge">0 Vehicles</span>
+                </div>
+
+                <div class="signal-row">
+                    <div class="signal-info">
+                        <strong>West Road</strong>
+                        <p>Vehicle density</p>
+                    </div>
+                    <span id="westDensity" class="badge red-badge">0 Vehicles</span>
+                </div>
+
+                <div class="chart-footer">
+                    <span>Smart Signal Status</span>
+                    <strong id="smartStatus">Waiting</strong>
+                </div>
+            </div>
+
             <div class="panel" id="analytics">
                 <div class="panel-heading">
                     <h2>Traffic Analytics</h2>
@@ -264,8 +311,8 @@
         </footer>
 
     </main>
-<script src="script.js"></script>
+
+    <script src="script.js"></script>
 
 </body>
 </html>
-
