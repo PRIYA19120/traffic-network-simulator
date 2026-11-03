@@ -1,143 +1,126 @@
+document.addEventListener("DOMContentLoaded", function () {
 
-const startBtn = document.querySelector(".start-btn");
-const resetBtn = document.querySelector(".reset-btn");
-const statusBox = document.querySelector(".status");
+    const startBtn = document.querySelector(".start-btn");
+    const resetBtn = document.querySelector(".reset-btn");
+    const statusBox = document.querySelector(".status");
 
-const cars = document.querySelectorAll(".car");
-const trafficLights = document.querySelectorAll(".traffic-light");
-const signalRows = document.querySelectorAll(".signal-row");
+    const cars = document.querySelectorAll(".car");
+    const lights = document.querySelectorAll(".traffic-light");
 
-const vehicleCount = document.querySelector(".stat-card:nth-child(1) h2");
-const speedCount = document.querySelector(".stat-card:nth-child(2) h2");
-const densityCount = document.querySelector(".stat-card:nth-child(3) h2");
-const progressFill = document.querySelector(".progress-fill");
+    let running = false;
+    let movement;
+    let signalTimer;
 
-let simulationRunning = false;
-let simulationInterval;
-let signalInterval;
-let vehiclePositions = [];
-let signalStates = ["Red", "Green", "Yellow", "Red"];
+    let positions = [
+        8, 48, 82, 4, 48, 50
+    ];
 
-const originalPositions = [
-    { top: 34, left: 8 },
-    { top: 35, left: 48 },
-    { top: 30, left: 82 },
-    { top: 4, left: 29 },
-    { top: 78, left: 48 },
-    { top: 50, left: 74 }
-];
+    function moveCars() {
+        cars.forEach((car, index) => {
 
-function initializeSimulation() {
-    vehiclePositions = originalPositions.map(position => ({
-        top: position.top,
-        left: position.left
-    }));
+            if (index < 3) {
+                positions[index] += 2;
 
-    cars.forEach((car, index) => {
-        car.style.top = vehiclePositions[index].top + "%";
-        car.style.left = vehiclePositions[index].left + "%";
-        car.style.transition = "top 0.5s linear, left 0.5s linear";
-    });
+                if (positions[index] > 95) {
+                    positions[index] = 0;
+                }
 
-    vehicleCount.textContent = "1,248";
-    speedCount.innerHTML = '32 <span>km/h</span>';
-    densityCount.textContent = "68%";
-    progressFill.style.width = "68%";
-}
+                car.style.left = positions[index] + "%";
 
-function updateStatus() {
-    if (simulationRunning) {
-        statusBox.innerHTML = '<span class="online-dot"></span> Simulation Running';
-        startBtn.textContent = "⏸ Stop Simulation";
-    } else {
-        statusBox.innerHTML = '<span class="red-dot"></span> Simulation Paused';
-        startBtn.textContent = "▶ Start Simulation";
+            } else {
+                positions[index] += 2;
+
+                if (positions[index] > 90) {
+                    positions[index] = 0;
+                }
+
+                car.style.top = positions[index] + "%";
+            }
+
+        });
     }
-}
 
-cars.forEach(car => {
-    car.style.position = "absolute";
-    car.style.display = "block";
-    car.style.zIndex = "10";
-});
-    const density = Math.floor(Math.random() * 35) + 45;
-    const speed = Math.floor(Math.random() * 20) + 25;
+    function changeSignals() {
 
-    densityCount.textContent = density + "%";
-    speedCount.innerHTML = speed + ' <span>km/h</span>';
-    progressFill.style.width = density + "%";
-}
+        lights.forEach((light, index) => {
 
-function changeTrafficSignals() {
-    signalStates = signalStates.map(state => {
-        if (state === "Red") return "Green";
-        if (state === "Green") return "Yellow";
-        return "Red";
-    });
+            const bulbs = light.querySelectorAll("span");
 
-    trafficLights.forEach((light, index) => {
-        const bulbs = light.querySelectorAll("span");
+            bulbs.forEach(bulb => {
+                bulb.className = "";
+            });
 
-        bulbs.forEach(bulb => {
-            bulb.classList.remove(
-                "light-red",
-                "light-yellow",
-                "light-green"
-            );
+            const state = Math.floor(Math.random() * 3);
+
+            if (state === 0) {
+                bulbs[0].className = "light-red";
+            } else if (state === 1) {
+                bulbs[1].className = "light-yellow";
+            } else {
+                bulbs[2].className = "light-green";
+            }
+
         });
 
-        const state = signalStates[index];
+    }
 
-        if (state === "Red") {
-            bulbs[0].classList.add("light-red");
-        } else if (state === "Yellow") {
-            bulbs[1].classList.add("light-yellow");
-        } else {
-            bulbs[2].classList.add("light-green");
+    function startSimulation() {
+
+        if (running) {
+            stopSimulation();
+            return;
         }
 
-        const badge = signalRows[index].querySelector(".badge");
-        badge.textContent = state;
-        badge.className = "badge " + state.toLowerCase() + "-badge";
-    });
-}
+        running = true;
 
-function startSimulation() {
-    simulationRunning = true;
+        statusBox.innerHTML =
+            '<span class="online-dot"></span> Simulation Running';
 
-    updateStatus();
+        startBtn.textContent = "⏸ Stop Simulation";
 
-    simulationInterval = setInterval(moveVehicles, 500);
-    signalInterval = setInterval(changeTrafficSignals, 4000);
-}
+        movement = setInterval(moveCars, 300);
+        signalTimer = setInterval(changeSignals, 3000);
 
-function stopSimulation() {
-    simulationRunning = false;
-
-    clearInterval(simulationInterval);
-    clearInterval(signalInterval);
-
-    updateStatus();
-}
-
-startBtn.addEventListener("click", () => {
-    if (simulationRunning) {
-        stopSimulation();
-    } else {
-        startSimulation();
     }
+
+    function stopSimulation() {
+
+        running = false;
+
+        clearInterval(movement);
+        clearInterval(signalTimer);
+
+        statusBox.innerHTML =
+            '<span class="red-dot"></span> Simulation Paused';
+
+        startBtn.textContent = "▶ Start Simulation";
+
+    }
+
+    function resetSimulation() {
+
+        stopSimulation();
+
+        positions = [8, 48, 82, 4, 48, 50];
+
+        cars.forEach((car, index) => {
+
+            if (index < 3) {
+                car.style.left = positions[index] + "%";
+            } else {
+                car.style.top = positions[index] + "%";
+            }
+
+        });
+
+        changeSignals();
+
+    }
+
+    startBtn.addEventListener("click", startSimulation);
+
+    resetBtn.addEventListener("click", resetSimulation);
+
+    console.log("Traffic Simulator Loaded Successfully");
+
 });
-
-resetBtn.addEventListener("click", () => {
-    stopSimulation();
-
-    signalStates = ["Red", "Green", "Yellow", "Red"];
-
-    initializeSimulation();
-
-    changeTrafficSignals();
-    updateStatus();
-});
-
-initializeSimulation();
-updateStatus();
