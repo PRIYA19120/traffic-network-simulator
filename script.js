@@ -18,26 +18,30 @@ document.addEventListener("DOMContentLoaded", function () {
     const smartStatus = document.getElementById("smartStatus");
 
     let running = false;
-    let movement;
-    let signalTimer;
-    let densityTimer;
+    let movement = null;
+    let densityTimer = null;
+    let signalTimer = null;
+    let yellowTimer = null;
 
     let positions = [8, 48, 82, 4, 48, 50];
 
     let densities = {
-        north: 0,
-        south: 0,
-        east: 0,
-        west: 0
+        north: 8,
+        south: 12,
+        east: 6,
+        west: 10
     };
 
     let activeRoad = "north";
+
+    const roads = ["north", "south", "east", "west"];
 
     function moveCars() {
 
         cars.forEach((car, index) => {
 
             if (index < 3) {
+
                 positions[index] += 2;
 
                 if (positions[index] > 95) {
@@ -47,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 car.style.left = positions[index] + "%";
 
             } else {
+
                 positions[index] += 2;
 
                 if (positions[index] > 90) {
@@ -54,33 +59,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 car.style.top = positions[index] + "%";
+
             }
 
         });
+
     }
 
     function updateDensity() {
 
-        densities.north = Math.floor(Math.random() * 15) + 5;
-        densities.south = Math.floor(Math.random() * 15) + 5;
-        densities.east = Math.floor(Math.random() * 15) + 5;
-        densities.west = Math.floor(Math.random() * 15) + 5;
+        roads.forEach(road => {
 
-        densityElements.north.textContent = densities.north + " Vehicles";
-        densityElements.south.textContent = densities.south + " Vehicles";
-        densityElements.east.textContent = densities.east + " Vehicles";
-        densityElements.west.textContent = densities.west + " Vehicles";
+            densities[road] = Math.floor(Math.random() * 16) + 5;
 
-        Object.keys(densities).forEach(road => {
-
-            const value = densities[road];
             const element = densityElements[road];
+
+            element.textContent = densities[road] + " Vehicles";
 
             element.className = "badge";
 
-            if (value >= 15) {
+            if (densities[road] >= 15) {
                 element.classList.add("red-badge");
-            } else if (value >= 10) {
+            } else if (densities[road] >= 10) {
                 element.classList.add("yellow-badge");
             } else {
                 element.classList.add("green-badge");
@@ -88,34 +88,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
         });
 
-        smartTrafficControl();
+    }
+
+    function getHighestTrafficRoad() {
+
+        return roads.reduce((highest, road) => {
+
+            return densities[road] > densities[highest]
+                ? road
+                : highest;
+
+        }, roads[0]);
+
     }
 
     function smartTrafficControl() {
 
-        const roads = Object.keys(densities);
-
-        activeRoad = roads.reduce((highest, road) => {
-            return densities[road] > densities[highest] ? road : highest;
-        }, roads[0]);
+        activeRoad = getHighestTrafficRoad();
 
         const highestDensity = densities[activeRoad];
 
-        const greenTime = Math.min(60, Math.max(15, highestDensity * 3));
-
-        smartStatus.textContent =
-            activeRoad.toUpperCase() + " GREEN - " + greenTime + " sec";
-
-        smartStatus.style.color = "#22d3ee";
+        const greenTime = Math.min(
+            60,
+            Math.max(15, highestDensity * 3)
+        );
 
         return greenTime;
+
     }
 
-    function changeSignals() {
+    function setAllRed() {
 
-        const greenTime = smartTrafficControl();
-
-        lights.forEach((light, index) => {
+        lights.forEach(light => {
 
             const bulbs = light.querySelectorAll("span");
 
@@ -123,44 +127,63 @@ document.addEventListener("DOMContentLoaded", function () {
                 bulb.className = "";
             });
 
-            if (index === 0) {
-                bulbs[2].className = "light-green";
-            } else {
-                bulbs[0].className = "light-red";
-            }
+            bulbs[0].className = "light-red";
 
         });
 
-        const activeLight = lights[0];
-        const bulbs = activeLight.querySelectorAll("span");
+    }
+
+    function changeSignals() {
+
+        if (!running) return;
 
         clearTimeout(signalTimer);
+        clearTimeout(yellowTimer);
 
-        bulbs.forEach(bulb => {
-            bulb.className = "";
-        });
+        const greenTime = smartTrafficControl();
 
-        bulbs[2].className = "light-green";
+        const activeIndex = roads.indexOf(activeRoad);
+
+        setAllRed();
+
+        const activeLight = lights[activeIndex];
+
+        if (!activeLight) return;
+
+        const activeBulbs = activeLight.querySelectorAll("span");
+
+        activeBulbs[0].className = "";
+        activeBulbs[2].className = "light-green";
+
+        smartStatus.textContent =
+            activeRoad.toUpperCase() +
+            " GREEN - " + greenTime + " sec";
 
         signalTimer = setTimeout(() => {
 
-            bulbs[2].className = "";
-            bulbs[1].className = "light-yellow";
+            if (!running) return;
 
-            setTimeout(() => {
+            activeBulbs[2].className = "";
+            activeBulbs[1].className = "light-yellow";
 
-                bulbs[1].className = "";
-                bulbs[0].className = "light-red";
+            smartStatus.textContent =
+                activeRoad.toUpperCase() + " YELLOW";
+
+            yellowTimer = setTimeout(() => {
+
+                if (!running) return;
+
+                activeBulbs[1].className = "";
+                activeBulbs[0].className = "light-red";
 
                 updateDensity();
 
-                if (running) {
-                    changeSignals();
-                }
+                changeSignals();
 
             }, 2000);
 
         }, greenTime * 1000);
+
     }
 
     function startSimulation() {
@@ -184,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
         densityTimer = setInterval(updateDensity, 5000);
 
         changeSignals();
+
     }
 
     function stopSimulation() {
@@ -192,12 +216,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
         clearInterval(movement);
         clearInterval(densityTimer);
+
         clearTimeout(signalTimer);
+        clearTimeout(yellowTimer);
+
+        movement = null;
+        densityTimer = null;
+        signalTimer = null;
+        yellowTimer = null;
 
         statusBox.innerHTML =
             '<span class="red-dot"></span> Simulation Paused';
 
         startBtn.textContent = "▶ Start Simulation";
+
+        smartStatus.textContent = "Paused";
+
     }
 
     function resetSimulation() {
@@ -216,30 +250,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
         });
 
-        Object.keys(densities).forEach(road => {
+        roads.forEach(road => {
+
             densities[road] = 0;
+
             densityElements[road].textContent = "0 Vehicles";
+
             densityElements[road].className = "badge";
+
         });
+
+        setAllRed();
 
         smartStatus.textContent = "Waiting";
-        smartStatus.style.color = "";
 
-        lights.forEach(light => {
-
-            const bulbs = light.querySelectorAll("span");
-
-            bulbs.forEach(bulb => {
-                bulb.className = "";
-            });
-
-            bulbs[0].className = "light-red";
-        });
     }
 
     startBtn.addEventListener("click", startSimulation);
 
     resetBtn.addEventListener("click", resetSimulation);
+
+    setAllRed();
 
     console.log("Smart Traffic Simulator Loaded Successfully");
 
