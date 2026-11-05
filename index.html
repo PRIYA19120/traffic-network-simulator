@@ -345,6 +345,32 @@
 <div class="accident-panel">
     <h2>🚨 Accident Detection System</h2>
 
+<div class="weather-panel">
+    <h2>🌦️ Weather-Based Traffic Management</h2>
+
+    <div class="weather-controls">
+        <div>
+            <label for="weatherCondition">Select Weather</label>
+            <select id="weatherCondition">
+                <option value="sunny">Sunny</option>
+                <option value="rainy">Rainy</option>
+                <option value="foggy">Foggy</option>
+            </select>
+        </div>
+
+        <button id="applyWeather" type="button">
+            Apply Weather
+        </button>
+    </div>
+
+    <div id="weatherStatus">
+        ☀️ Normal Weather Conditions
+    </div>
+
+    <p id="weatherDetails">
+        Traffic is operating under normal weather conditions.
+    </p>
+</div>
     <div class="accident-controls">
         <div>
             <label for="accidentRoad">Select Accident Location</label>
@@ -472,7 +498,7 @@
                 </div>
 
             </div>
-            ```html
+            
 <!-- Traffic Congestion Monitoring -->
 
 <div class="panel congestion-panel" id="congestion">

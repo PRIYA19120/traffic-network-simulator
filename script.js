@@ -50,6 +50,7 @@ let emergencyRoad = "north";
     ];
 
     let running = false;
+    let currentWeather = "sunny";
     let movement = null;
     let densityTimer = null;
     let signalTimer = null;
@@ -106,9 +107,21 @@ let emergencyRoad = "north";
 
         const trafficPercentage = Math.round((averageDensity / 20) * 100);
 
-        const averageSpeed = running
-            ? Math.max(10, Math.round(60 - averageDensity * 2))
-            : 0;
+        let averageSpeed = 0;
+
+if (running) {
+    let normalSpeed = Math.max(10, Math.round(60 - averageDensity * 2));
+
+    if (currentWeather === "rainy") {
+        averageSpeed = Math.round(normalSpeed * 0.65);
+    } 
+    else if (currentWeather === "foggy") {
+        averageSpeed = Math.round(normalSpeed * 0.45);
+    } 
+    else {
+        averageSpeed = normalSpeed;
+    }
+}
 
         activeVehiclesElement.textContent = cars.length;
         averageSpeedElement.textContent = averageSpeed;
@@ -530,5 +543,46 @@ updateEmergencyStatus();
     updateVehicleManagement();
 
     console.log("Smart Traffic Simulator Loaded Successfully");
+
+});
+
+
+const weatherCondition = document.getElementById("weatherCondition");
+const applyWeather = document.getElementById("applyWeather");
+const weatherStatus = document.getElementById("weatherStatus");
+const weatherDetails = document.getElementById("weatherDetails");
+
+applyWeather.addEventListener("click", function () {
+
+    currentWeather = weatherCondition.value;
+
+    if (currentWeather === "sunny") {
+
+        weatherStatus.innerHTML = "☀️ Normal Weather Conditions";
+        weatherDetails.innerHTML = "Traffic is operating under normal weather conditions.";
+        weatherStatus.style.background = "#dcfce7";
+        weatherStatus.style.color = "#166534";
+
+    }
+
+    else if (currentWeather === "rainy") {
+
+        weatherStatus.innerHTML = "🌧️ Rain Alert: Drive Slowly!";
+        weatherDetails.innerHTML = "Rain detected. Traffic speed is reduced by 35%.";
+        weatherStatus.style.background = "#fef3c7";
+        weatherStatus.style.color = "#92400e";
+
+    }
+
+    else if (currentWeather === "foggy") {
+
+        weatherStatus.innerHTML = "🌫️ Fog Alert: Low Visibility!";
+        weatherDetails.innerHTML = "Fog detected. Traffic speed is reduced by 55%. Drive carefully.";
+        weatherStatus.style.background = "#fee2e2";
+        weatherStatus.style.color = "#991b1b";
+
+    }
+
+    updateDashboardStats();
 
 });
