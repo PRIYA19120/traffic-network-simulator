@@ -1,5 +1,11 @@
 # Traffic Network Simulator 🚦
 
+## 🌐 Live Demo
+
+🚀 **[View Traffic Network Simulator](https://priya19120.github.io/traffic-network-simulator/)**
+
+Explore the live traffic simulation, vehicle movement, traffic signals, analytics and weather-based traffic management.
+
 **TrafficFlow – Smart Traffic Management and Simulation System**
 
 ## 📌 About the Project
