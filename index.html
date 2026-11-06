@@ -36,6 +36,7 @@
                 <h1>Traffic Network Simulator</h1>
                 <p>Monitor and analyze urban traffic flow</p>
             </div>
+
             <div class="status">
                 <span class="red-dot"></span> Simulation Paused
             </div>
@@ -82,6 +83,7 @@
                     <h2>Live Traffic Network</h2>
                     <p>City intersection overview</p>
                 </div>
+
                 <span class="live-label">● NETWORK VIEW</span>
             </div>
 
@@ -142,6 +144,7 @@
             </div>
 
             <div class="simulation-controls">
+
                 <div>
                     <strong>Simulation Controls</strong>
                     <p>Manage your traffic network</p>
@@ -154,6 +157,7 @@
                 <button class="reset-btn" type="button">
                     ↻ Reset
                 </button>
+
             </div>
 
         </section>
@@ -302,13 +306,11 @@
                                 </linearGradient>
                             </defs>
 
-                            <path
-                                id="trafficGraphArea"
+                            <path id="trafficGraphArea"
                                 d="M0,145 L50,120 L100,132 L150,70 L200,90 L250,45 L300,65 L350,20 L400,40 L400,180 L0,180 Z"
                                 fill="url(#areaFill)"/>
 
-                            <polyline
-                                id="trafficGraphLine"
+                            <polyline id="trafficGraphLine"
                                 points="0,145 50,120 100,132 150,70 200,90 250,45 300,65 350,20 400,40"
                                 fill="none"
                                 stroke="#22d3ee"
@@ -337,92 +339,140 @@
 
             </div>
 
-            <!-- Vehicle Management Panel -->
-             
-<div class="emergency-panel">
-    <h2>🚑 Emergency Vehicle Priority</h2>
-    
-<div class="accident-panel">
-    <h2>🚨 Accident Detection System</h2>
+            <div class="emergency-panel">
 
-<div class="weather-panel">
-    <h2>🌦️ Weather-Based Traffic Management</h2>
+                <h2>🚑 Emergency Vehicle Priority</h2>
 
-    <div class="weather-controls">
-        <div>
-            <label for="weatherCondition">Select Weather</label>
-            <select id="weatherCondition">
-                <option value="sunny">Sunny</option>
-                <option value="rainy">Rainy</option>
-                <option value="foggy">Foggy</option>
-            </select>
-        </div>
+                <div class="emergency-content">
 
-        <button id="applyWeather" type="button">
-            Apply Weather
-        </button>
-    </div>
+                    <div class="ambulance-icon">🚑</div>
 
-    <div id="weatherStatus">
-        ☀️ Normal Weather Conditions
-    </div>
+                    <div class="emergency-controls">
 
-    <p id="weatherDetails">
-        Traffic is operating under normal weather conditions.
-    </p>
-</div>
-    <div class="accident-controls">
-        <div>
-            <label for="accidentRoad">Select Accident Location</label>
-            <select id="accidentRoad">
-                <option value="north">North Road</option>
-                <option value="south">South Road</option>
-                <option value="east">East Road</option>
-                <option value="west">West Road</option>
-            </select>
-        </div>
+                        <label for="emergencyRoad">Select Emergency Road</label>
 
-        <button id="detectAccident" type="button">
-            Report Accident
-        </button>
+                        <select id="emergencyRoad">
+                            <option value="north">North Road</option>
+                            <option value="south">South Road</option>
+                            <option value="east">East Road</option>
+                            <option value="west">West Road</option>
+                        </select>
 
-        <button id="clearAccident" type="button">
-            Clear Alert
-        </button>
-    </div>
+                        <button id="emergencyToggle" type="button">
+                            Activate Emergency
+                        </button>
 
-    <div id="accidentAlert" class="accident-alert">
-        <span>🟢</span> No Accident Detected
-    </div>
+                        <p id="emergencyStatus">Emergency Mode: OFF</p>
 
-    <div id="accidentDetails">
-        All roads are operating normally.
-    </div>
-</div>
+                    </div>
 
+                </div>
 
-    <div class="emergency-content">
-        <div class="ambulance-icon">🚑</div>
+            </div>
 
-        <div class="emergency-controls">
-            <label for="emergencyRoad">Select Emergency Road</label>
+            <div class="accident-panel">
 
-            <select id="emergencyRoad">
-                <option value="north">North Road</option>
-                <option value="south">South Road</option>
-                <option value="east">East Road</option>
-                <option value="west">West Road</option>
-            </select>
+                <h2>🚨 Accident Detection System</h2>
 
-            <button id="emergencyToggle" type="button">
-                Activate Emergency
-            </button>
+                <div class="accident-controls">
 
-            <p id="emergencyStatus">Emergency Mode: OFF</p>
-        </div>
-    </div>
-</div>
+                    <div>
+                        <label for="accidentRoad">Select Accident Location</label>
 
+                        <select id="accidentRoad">
+                            <option value="north">North Road</option>
+                            <option value="south">South Road</option>
+                            <option value="east">East Road</option>
+                            <option value="west">West Road</option>
+                        </select>
+                    </div>
+
+                    <button id="detectAccident" type="button">
+                        Report Accident
+                    </button>
+
+                    <button id="clearAccident" type="button">
+                        Clear Alert
+                    </button>
+
+                </div>
+
+                <div id="accidentAlert" class="accident-alert">
+                    <span>🟢</span> No Accident Detected
+                </div>
+
+                <div id="accidentDetails">
+                    All roads are operating normally.
+                </div>
+
+            </div>
+
+            <div class="weather-panel">
+
+                <div class="panel-heading">
+                    <h2>🌦️ Live Weather Management</h2>
+                    <span class="today-label">LIVE API</span>
+                </div>
+
+                <p class="chart-description">
+                    Real-time weather information and traffic adjustment
+                </p>
+
+                <div class="weather-controls">
+
+                    <div>
+                        <label for="weatherCity">Enter City Name</label>
+
+                        <input
+                            type="text"
+                            id="weatherCity"
+                            placeholder="Enter city name"
+                            value="Dehradun">
+                    </div>
+
+                    <button id="getWeather" type="button">
+                        Get Live Weather
+                    </button>
+
+                </div>
+
+                <div id="weatherStatus">
+                    🌤️ Loading weather information...
+                </div>
+
+                <p id="weatherDetails">
+                    Fetching current weather data.
+                </p>
+
+                <div class="weather-info">
+
+                    <div class="weather-info-card">
+                        <span>🌡️</span>
+                        <p>Temperature</p>
+                        <strong id="weatherTemp">--</strong>
+                    </div>
+
+                    <div class="weather-info-card">
+                        <span>💧</span>
+                        <p>Humidity</p>
+                        <strong id="weatherHumidity">--</strong>
+                    </div>
+
+                    <div class="weather-info-card">
+                        <span>💨</span>
+                        <p>Wind Speed</p>
+                        <strong id="weatherWind">--</strong>
+                    </div>
+
+                    <div class="weather-info-card">
+                        <span>🌦️</span>
+                        <p>Condition</p>
+                        <strong id="weatherConditionText">--</strong>
+                    </div>
+
+                </div>
+
+            </div>
 
             <div class="panel vehicle-panel" id="vehicle-management">
 
@@ -498,71 +548,60 @@
                 </div>
 
             </div>
-            
-<!-- Traffic Congestion Monitoring -->
 
-<div class="panel congestion-panel" id="congestion">
+            <div class="panel congestion-panel" id="congestion">
 
-    <div class="panel-heading">
-        <h2>Traffic Congestion Monitoring</h2>
-        <span class="today-label">LIVE MONITORING</span>
-    </div>
+                <div class="panel-heading">
+                    <h2>Traffic Congestion Monitoring</h2>
+                    <span class="today-label">LIVE MONITORING</span>
+                </div>
 
-    <p class="chart-description">
-        Automatic road congestion detection
-    </p>
+                <p class="chart-description">
+                    Automatic road congestion detection
+                </p>
 
-    <div class="congestion-alert" id="congestionAlert">
-        <span>🟢</span>
-        <strong>All Roads Normal</strong>
-    </div>
+                <div class="congestion-alert" id="congestionAlert">
+                    <span>🟢</span>
+                    <strong>All Roads Normal</strong>
+                </div>
 
-    <div class="congestion-list">
+                <div class="congestion-list">
 
-        <div class="congestion-row">
-            <div>
-                <strong>North Road</strong>
-                <p>Traffic condition</p>
+                    <div class="congestion-row">
+                        <div>
+                            <strong>North Road</strong>
+                            <p>Traffic condition</p>
+                        </div>
+                        <span id="northCongestion" class="congestion-badge smooth">Smooth</span>
+                    </div>
+
+                    <div class="congestion-row">
+                        <div>
+                            <strong>South Road</strong>
+                            <p>Traffic condition</p>
+                        </div>
+                        <span id="southCongestion" class="congestion-badge smooth">Smooth</span>
+                    </div>
+
+                    <div class="congestion-row">
+                        <div>
+                            <strong>East Road</strong>
+                            <p>Traffic condition</p>
+                        </div>
+                        <span id="eastCongestion" class="congestion-badge smooth">Smooth</span>
+                    </div>
+
+                    <div class="congestion-row">
+                        <div>
+                            <strong>West Road</strong>
+                            <p>Traffic condition</p>
+                        </div>
+                        <span id="westCongestion" class="congestion-badge smooth">Smooth</span>
+                    </div>
+
+                </div>
+
             </div>
-            <span id="northCongestion" class="congestion-badge smooth">
-                Smooth
-            </span>
-        </div>
-
-        <div class="congestion-row">
-            <div>
-                <strong>South Road</strong>
-                <p>Traffic condition</p>
-            </div>
-            <span id="southCongestion" class="congestion-badge smooth">
-                Smooth
-            </span>
-        </div>
-
-        <div class="congestion-row">
-            <div>
-                <strong>East Road</strong>
-                <p>Traffic condition</p>
-            </div>
-            <span id="eastCongestion" class="congestion-badge smooth">
-                Smooth
-            </span>
-        </div>
-
-        <div class="congestion-row">
-            <div>
-                <strong>West Road</strong>
-                <p>Traffic condition</p>
-            </div>
-            <span id="westCongestion" class="congestion-badge smooth">
-                Smooth
-            </span>
-        </div>
-
-    </div>
-
-</div>
-
 
         </section>
 
@@ -576,4 +615,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>
