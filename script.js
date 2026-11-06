@@ -16,20 +16,16 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     const smartStatus = document.getElementById("smartStatus");
-const accidentRoadSelect = document.getElementById("accidentRoad");
-const detectAccidentBtn = document.getElementById("detectAccident");
-const clearAccidentBtn = document.getElementById("clearAccident");
-const accidentAlert = document.getElementById("accidentAlert");
-const accidentDetails = document.getElementById("accidentDetails");
 
-let accidentActive = false;
-let accidentRoad = "";
-const emergencyRoadSelect = document.getElementById("emergencyRoad");
-const emergencyToggle = document.getElementById("emergencyToggle");
-const emergencyStatus = document.getElementById("emergencyStatus");
+    const accidentRoadSelect = document.getElementById("accidentRoad");
+    const detectAccidentBtn = document.getElementById("detectAccident");
+    const clearAccidentBtn = document.getElementById("clearAccident");
+    const accidentAlert = document.getElementById("accidentAlert");
+    const accidentDetails = document.getElementById("accidentDetails");
 
-let emergencyActive = false;
-let emergencyRoad = "north";
+    const emergencyRoadSelect = document.getElementById("emergencyRoad");
+    const emergencyToggle = document.getElementById("emergencyToggle");
+    const emergencyStatus = document.getElementById("emergencyStatus");
 
     const activeVehiclesElement = document.getElementById("activeVehicles");
     const averageSpeedElement = document.getElementById("averageSpeed");
@@ -49,8 +45,32 @@ let emergencyRoad = "north";
         document.getElementById("vehicleStatus6")
     ];
 
+    const weatherCondition = document.getElementById("weatherCondition");
+    const applyWeather = document.getElementById("applyWeather");
+    const weatherStatus = document.getElementById("weatherStatus");
+    const weatherDetails = document.getElementById("weatherDetails");
+
+    const graphLine = document.getElementById("trafficGraphLine");
+    const graphArea = document.getElementById("trafficGraphArea");
+
+    const congestionElements = {
+        north: document.getElementById("northCongestion"),
+        south: document.getElementById("southCongestion"),
+        east: document.getElementById("eastCongestion"),
+        west: document.getElementById("westCongestion")
+    };
+
+    const congestionAlert = document.getElementById("congestionAlert");
+
     let running = false;
     let currentWeather = "sunny";
+
+    let accidentActive = false;
+    let accidentRoad = "";
+
+    let emergencyActive = false;
+    let emergencyRoad = "north";
+
     let movement = null;
     let densityTimer = null;
     let signalTimer = null;
@@ -69,15 +89,26 @@ let emergencyRoad = "north";
 
     const roads = ["north", "south", "east", "west"];
 
+    let graphValues = [145, 120, 132, 70, 90, 45, 65, 20, 40];
+
     function moveCars() {
         cars.forEach((car, index) => {
             if (index < 3) {
                 positions[index] += 2;
-                if (positions[index] > 95) positions[index] = 0;
+
+                if (positions[index] > 95) {
+                    positions[index] = 0;
+                }
+
                 car.style.left = positions[index] + "%";
+
             } else {
                 positions[index] += 2;
-                if (positions[index] > 90) positions[index] = 0;
+
+                if (positions[index] > 90) {
+                    positions[index] = 0;
+                }
+
                 car.style.top = positions[index] + "%";
             }
         });
@@ -93,6 +124,8 @@ let emergencyRoad = "north";
         stoppedVehiclesElement.textContent = stopped;
 
         vehicleStatusElements.forEach(element => {
+            if (!element) return;
+
             element.textContent = running ? "Moving" : "Stopped";
             element.style.color = running ? "#22c55e" : "#facc15";
         });
@@ -105,32 +138,37 @@ let emergencyRoad = "north";
 
         const averageDensity = totalDensity / roads.length;
 
-        const trafficPercentage = Math.round((averageDensity / 20) * 100);
+        const trafficPercentage = Math.round(
+            (averageDensity / 20) * 100
+        );
 
         let averageSpeed = 0;
 
-if (running) {
-    let normalSpeed = Math.max(10, Math.round(60 - averageDensity * 2));
+        if (running) {
+            const normalSpeed = Math.max(
+                10,
+                Math.round(60 - averageDensity * 2)
+            );
 
-    if (currentWeather === "rainy") {
-        averageSpeed = Math.round(normalSpeed * 0.65);
-    } 
-    else if (currentWeather === "foggy") {
-        averageSpeed = Math.round(normalSpeed * 0.45);
-    } 
-    else {
-        averageSpeed = normalSpeed;
-    }
-}
+            if (currentWeather === "rainy") {
+                averageSpeed = Math.round(normalSpeed * 0.65);
+
+            } else if (currentWeather === "foggy") {
+                averageSpeed = Math.round(normalSpeed * 0.45);
+
+            } else {
+                averageSpeed = normalSpeed;
+            }
+        }
 
         activeVehiclesElement.textContent = cars.length;
-        averageSpeedElement.textContent = averageSpeed;
+        averageSpeedElement.textContent = averageSpeed + " km/h";
         trafficDensityElement.textContent = trafficPercentage + "%";
         activeSignalsElement.textContent = lights.length;
     }
 
     function updateTrafficGraph() {
-        if (!running) return;
+        if (!running || !graphLine || !graphArea) return;
 
         const averageDensity = roads.reduce((sum, road) => {
             return sum + densities[road];
@@ -156,132 +194,130 @@ if (running) {
         );
     }
 
-    const graphLine = document.getElementById("trafficGraphLine");
-    const graphArea = document.getElementById("trafficGraphArea");
+    function updateCongestion() {
+        let highCount = 0;
+        let moderateCount = 0;
 
-    let graphValues = [145, 120, 132, 70, 90, 45, 65, 20, 40];
-    
-const congestionElements = {
-    north: document.getElementById("northCongestion"),
-    south: document.getElementById("southCongestion"),
-    east: document.getElementById("eastCongestion"),
-    west: document.getElementById("westCongestion")
-};
+        roads.forEach(road => {
+            const density = densities[road];
+            const element = congestionElements[road];
 
-const congestionAlert = document.getElementById("congestionAlert");
+            if (!element) return;
 
-function updateCongestion() {
+            element.className = "congestion-badge";
 
-    let highCount = 0;
-    let moderateCount = 0;
+            if (density >= 15) {
+                element.textContent = "High";
+                element.classList.add("high");
+                highCount++;
 
-    roads.forEach(road => {
+            } else if (density >= 10) {
+                element.textContent = "Moderate";
+                element.classList.add("moderate");
+                moderateCount++;
 
-        const density = densities[road];
-        const element = congestionElements[road];
+            } else {
+                element.textContent = "Smooth";
+                element.classList.add("smooth");
+            }
+        });
 
-        element.className = "congestion-badge";
+        if (!congestionAlert) return;
 
-        if (density >= 15) {
+        if (highCount > 0) {
+            congestionAlert.innerHTML =
+                "🔴 <strong>" + highCount +
+                " Road(s) Experiencing High Congestion</strong>";
 
-            element.textContent = "High";
-            element.classList.add("high");
-            highCount++;
+            congestionAlert.style.color = "#ef4444";
 
-        } else if (density >= 10) {
+        } else if (moderateCount > 0) {
+            congestionAlert.innerHTML =
+                "🟡 <strong>Moderate Traffic Detected</strong>";
 
-            element.textContent = "Moderate";
-            element.classList.add("moderate");
-            moderateCount++;
+            congestionAlert.style.color = "#facc15";
 
         } else {
+            congestionAlert.innerHTML =
+                "🟢 <strong>All Roads Normal</strong>";
 
-            element.textContent = "Smooth";
-            element.classList.add("smooth");
-
+            congestionAlert.style.color = "#22c55e";
         }
-
-    });
-
-    if (highCount > 0) {
-
-        congestionAlert.innerHTML =
-            "🔴 <strong>" + highCount + " Road(s) Experiencing High Congestion</strong>";
-
-        congestionAlert.style.color = "#ef4444";
-
-    } else if (moderateCount > 0) {
-
-        congestionAlert.innerHTML =
-            "🟡 <strong>Moderate Traffic Detected</strong>";
-
-        congestionAlert.style.color = "#facc15";
-
-    } else {
-
-        congestionAlert.innerHTML =
-            "🟢 <strong>All Roads Normal</strong>";
-
-        congestionAlert.style.color = "#22c55e";
-
     }
 
-}
-
-
-    function updateDensity() {
+    function updateDensityDisplay() {
         roads.forEach(road => {
-            densities[road] = Math.floor(Math.random() * 16) + 5;
-
             const element = densityElements[road];
+
+            if (!element) return;
+
+            if (road === accidentRoad && accidentActive) {
+                element.textContent = "Accident Detected";
+                element.className = "badge red-badge";
+                return;
+            }
 
             element.textContent = densities[road] + " Vehicles";
             element.className = "badge";
 
             if (densities[road] >= 15) {
                 element.classList.add("red-badge");
+
             } else if (densities[road] >= 10) {
                 element.classList.add("yellow-badge");
+
             } else {
                 element.classList.add("green-badge");
             }
-            updateCongestion();
+        });
+    }
+
+    function updateDensity() {
+        roads.forEach(road => {
+            densities[road] = Math.floor(Math.random() * 16) + 5;
         });
 
+        updateDensityDisplay();
+        updateCongestion();
         updateDashboardStats();
         updateTrafficGraph();
     }
 
     function getHighestTrafficRoad() {
         return roads.reduce((highest, road) => {
-            return densities[road] > densities[highest] ? road : highest;
+            return densities[road] > densities[highest]
+                ? road
+                : highest;
         }, roads[0]);
     }
 
-   
-function smartTrafficControl() {
-    if (emergencyActive) {
-        activeRoad = emergencyRoad;
-        return 30;
+    function smartTrafficControl() {
+        if (emergencyActive) {
+            activeRoad = emergencyRoad;
+            return 30;
+        }
+
+        activeRoad = getHighestTrafficRoad();
+
+        const highestDensity = densities[activeRoad];
+
+        return Math.min(
+            60,
+            Math.max(15, highestDensity * 3)
+        );
     }
-
-    activeRoad = getHighestTrafficRoad();
-
-    const highestDensity = densities[activeRoad];
-
-    const greenTime = Math.min(60, Math.max(15, highestDensity * 3));
-
-    return greenTime;
-}
-
 
     function setAllRed() {
         lights.forEach(light => {
             const bulbs = light.querySelectorAll("span");
 
-            bulbs.forEach(bulb => bulb.className = "");
+            bulbs.forEach(bulb => {
+                bulb.className = "";
+            });
 
-            bulbs[0].className = "light-red";
+            if (bulbs[0]) {
+                bulbs[0].className = "light-red";
+            }
         });
     }
 
@@ -303,12 +339,17 @@ function smartTrafficControl() {
 
         const activeBulbs = activeLight.querySelectorAll("span");
 
+        if (!activeBulbs[2]) return;
+
         activeBulbs[0].className = "";
         activeBulbs[2].className = "light-green";
 
         smartStatus.textContent = emergencyActive
-    ? "🚑 " + activeRoad.toUpperCase() + " EMERGENCY GREEN - " + greenTime + " sec"
-    : activeRoad.toUpperCase() + " GREEN - " + greenTime + " sec";
+            ? "🚑 " + activeRoad.toUpperCase() +
+              " EMERGENCY GREEN - " + greenTime + " sec"
+            : activeRoad.toUpperCase() +
+              " GREEN - " + greenTime + " sec";
+
         signalTimer = setTimeout(() => {
             if (!running) return;
 
@@ -339,13 +380,15 @@ function smartTrafficControl() {
 
         running = true;
 
-        statusBox.innerHTML = '<span class="online-dot"></span> Simulation Running';
+        statusBox.innerHTML =
+            '<span class="online-dot"></span> Simulation Running';
 
         startBtn.textContent = "⏸ Stop Simulation";
 
         updateDensity();
         updateDashboardStats();
         updateVehicleManagement();
+        updateEmergencyStatus();
 
         movement = setInterval(moveCars, 300);
 
@@ -367,132 +410,130 @@ function smartTrafficControl() {
         signalTimer = null;
         yellowTimer = null;
 
-        statusBox.innerHTML = '<span class="red-dot"></span> Simulation Paused';
+        statusBox.innerHTML =
+            '<span class="red-dot"></span> Simulation Paused';
 
         startBtn.textContent = "▶ Start Simulation";
 
         smartStatus.textContent = "Paused";
 
+        setAllRed();
+
         updateDashboardStats();
         updateVehicleManagement();
+        updateEmergencyStatus();
     }
-    
-function updateEmergencyStatus() {
-    emergencyToggle.textContent = emergencyActive
-        ? "Deactivate Emergency"
-        : "Activate Emergency";
 
-    emergencyStatus.classList.toggle("active", emergencyActive);
+    function updateEmergencyStatus() {
+        emergencyToggle.textContent = emergencyActive
+            ? "Deactivate Emergency"
+            : "Activate Emergency";
 
-    if (emergencyActive) {
-        emergencyStatus.textContent = running
-            ? "🚑 Emergency Priority Active: " + emergencyRoad.toUpperCase()
-            : "Emergency Mode ON - Start simulation to apply";
-    } else {
-        emergencyStatus.textContent = "Emergency Mode: OFF";
+        emergencyStatus.classList.toggle("active", emergencyActive);
+
+        if (emergencyActive) {
+            emergencyStatus.textContent = running
+                ? "🚑 Emergency Priority Active: " +
+                  emergencyRoad.toUpperCase()
+                : "Emergency Mode ON - Start simulation to apply";
+
+        } else {
+            emergencyStatus.textContent = "Emergency Mode: OFF";
+        }
     }
-}
 
-function toggleEmergency() {
-    emergencyActive = !emergencyActive;
-    emergencyRoad = emergencyRoadSelect.value;
+    function toggleEmergency() {
+        emergencyActive = !emergencyActive;
+        emergencyRoad = emergencyRoadSelect.value;
 
-    updateEmergencyStatus();
-
-    if (running) {
-        changeSignals();
-    }
-}
-
-emergencyToggle.addEventListener("click", toggleEmergency);
-
-emergencyRoadSelect.addEventListener("change", function () {
-    emergencyRoad = emergencyRoadSelect.value;
-
-    if (emergencyActive) {
         updateEmergencyStatus();
 
         if (running) {
             changeSignals();
         }
     }
-});
 
+    function detectAccident() {
+        accidentRoad = accidentRoadSelect.value;
+        accidentActive = true;
 
-function detectAccident() {
-    accidentRoad = accidentRoadSelect.value;
-    accidentActive = true;
+        accidentAlert.classList.add("detected");
 
-    accidentAlert.classList.add("detected");
-    accidentAlert.innerHTML =
-        "🔴 ACCIDENT DETECTED - " + accidentRoad.toUpperCase() + " ROAD";
+        accidentAlert.innerHTML =
+            "🔴 ACCIDENT DETECTED - " +
+            accidentRoad.toUpperCase() + " ROAD";
 
-    accidentDetails.textContent =
-        "Alert: An accident has been reported on " +
-        accidentRoad.toUpperCase() + " Road. Please monitor this simulated location.";
+        accidentDetails.textContent =
+            "Alert: An accident has been reported on " +
+            accidentRoad.toUpperCase() +
+            " Road. Please monitor this simulated location.";
 
-    accidentRoadSelect.disabled = true;
-    detectAccidentBtn.disabled = true;
+        accidentRoadSelect.disabled = true;
+        detectAccidentBtn.disabled = true;
 
-    const densityElement = densityElements[accidentRoad];
-    densityElement.textContent = "Accident Detected";
-    densityElement.className = "badge red-badge";
-}
+        updateDensityDisplay();
+    }
 
-function clearAccident() {
-    accidentActive = false;
-    accidentRoad = "";
+    function clearAccident() {
+        accidentActive = false;
+        accidentRoad = "";
 
-    accidentAlert.classList.remove("detected");
-    accidentAlert.innerHTML = "🟢 No Accident Detected";
+        accidentAlert.classList.remove("detected");
+        accidentAlert.innerHTML = "🟢 No Accident Detected";
 
-    accidentDetails.textContent =
-        "All roads are operating normally.";
+        accidentDetails.textContent =
+            "All roads are operating normally.";
 
-    accidentRoadSelect.disabled = false;
-    detectAccidentBtn.disabled = false;
+        accidentRoadSelect.disabled = false;
+        detectAccidentBtn.disabled = false;
 
-    roads.forEach(road => {
-        densityElements[road].textContent =
-            densities[road] + " Vehicles";
-    });
+        updateDensityDisplay();
+    }
 
-    updateDensityDisplay();
-}
+    function updateWeather() {
+        currentWeather = weatherCondition.value;
 
-function updateDensityDisplay() {
-    roads.forEach(road => {
-        const element = densityElements[road];
+        if (currentWeather === "sunny") {
+            weatherStatus.innerHTML = "☀️ Normal Weather Conditions";
 
-        if (road === accidentRoad && accidentActive) {
-            element.textContent = "Accident Detected";
-            element.className = "badge red-badge";
-            return;
+            weatherDetails.innerHTML =
+                "Traffic is operating under normal weather conditions.";
+
+            weatherStatus.style.background = "#dcfce7";
+            weatherStatus.style.color = "#166534";
+
+        } else if (currentWeather === "rainy") {
+            weatherStatus.innerHTML = "🌧️ Rain Alert: Drive Slowly!";
+
+            weatherDetails.innerHTML =
+                "Rain detected. Traffic speed is reduced by 35%.";
+
+            weatherStatus.style.background = "#fef3c7";
+            weatherStatus.style.color = "#92400e";
+
+        } else if (currentWeather === "foggy") {
+            weatherStatus.innerHTML = "🌫️ Fog Alert: Low Visibility!";
+
+            weatherDetails.innerHTML =
+                "Fog detected. Traffic speed is reduced by 55%. Drive carefully.";
+
+            weatherStatus.style.background = "#fee2e2";
+            weatherStatus.style.color = "#991b1b";
         }
 
-        element.textContent = densities[road] + " Vehicles";
-        element.className = "badge";
-
-        if (densities[road] >= 15) {
-            element.classList.add("red-badge");
-        } else if (densities[road] >= 10) {
-            element.classList.add("yellow-badge");
-        } else {
-            element.classList.add("green-badge");
-        }
-    });
-}
-
-detectAccidentBtn.addEventListener("click", detectAccident);
-clearAccidentBtn.addEventListener("click", clearAccident);
+        updateDashboardStats();
+    }
 
     function resetSimulation() {
         stopSimulation();
+
         clearAccident();
+
         emergencyActive = false;
-emergencyRoad = "north";
-emergencyRoadSelect.value = "north";
-updateEmergencyStatus();
+        emergencyRoad = "north";
+        emergencyRoadSelect.value = "north";
+
+        updateEmergencyStatus();
 
         positions = [8, 48, 82, 4, 48, 50];
 
@@ -506,83 +547,68 @@ updateEmergencyStatus();
 
         roads.forEach(road => {
             densities[road] = 0;
-
-            densityElements[road].textContent = "0 Vehicles";
-            densityElements[road].className = "badge";
         });
+
+        updateDensityDisplay();
         updateCongestion();
 
         setAllRed();
+
+        activeRoad = "north";
 
         smartStatus.textContent = "Waiting";
 
         graphValues = [145, 120, 132, 70, 90, 45, 65, 20, 40];
 
-        graphLine.setAttribute(
-            "points",
-            graphValues.map((value, index) => `${index * 50},${value}`).join(" ")
-        );
+        if (graphLine && graphArea) {
+            const points = graphValues.map((value, index) => {
+                return `${index * 50},${value}`;
+            }).join(" ");
 
-        graphArea.setAttribute(
-            "d",
-            "M0,145 L50,120 L100,132 L150,70 L200,90 L250,45 L300,65 L350,20 L400,40 L400,180 L0,180 Z"
-        );
+            graphLine.setAttribute("points", points);
+
+            graphArea.setAttribute(
+                "d",
+                `M${points.replaceAll(" ", " L")} L400,180 L0,180 Z`
+            );
+        }
 
         updateDashboardStats();
         updateVehicleManagement();
-        updateEmergencyStatus();
     }
 
     startBtn.addEventListener("click", startSimulation);
 
     resetBtn.addEventListener("click", resetSimulation);
 
+    emergencyToggle.addEventListener("click", toggleEmergency);
+
+    emergencyRoadSelect.addEventListener("change", function () {
+        emergencyRoad = emergencyRoadSelect.value;
+
+        if (emergencyActive) {
+            updateEmergencyStatus();
+
+            if (running) {
+                changeSignals();
+            }
+        }
+    });
+
+    detectAccidentBtn.addEventListener("click", detectAccident);
+
+    clearAccidentBtn.addEventListener("click", clearAccident);
+
+    applyWeather.addEventListener("click", updateWeather);
+
     setAllRed();
 
+    updateDensityDisplay();
+    updateCongestion();
     updateDashboardStats();
     updateVehicleManagement();
+    updateEmergencyStatus();
 
     console.log("Smart Traffic Simulator Loaded Successfully");
-
-});
-
-
-const weatherCondition = document.getElementById("weatherCondition");
-const applyWeather = document.getElementById("applyWeather");
-const weatherStatus = document.getElementById("weatherStatus");
-const weatherDetails = document.getElementById("weatherDetails");
-
-applyWeather.addEventListener("click", function () {
-
-    currentWeather = weatherCondition.value;
-
-    if (currentWeather === "sunny") {
-
-        weatherStatus.innerHTML = "☀️ Normal Weather Conditions";
-        weatherDetails.innerHTML = "Traffic is operating under normal weather conditions.";
-        weatherStatus.style.background = "#dcfce7";
-        weatherStatus.style.color = "#166534";
-
-    }
-
-    else if (currentWeather === "rainy") {
-
-        weatherStatus.innerHTML = "🌧️ Rain Alert: Drive Slowly!";
-        weatherDetails.innerHTML = "Rain detected. Traffic speed is reduced by 35%.";
-        weatherStatus.style.background = "#fef3c7";
-        weatherStatus.style.color = "#92400e";
-
-    }
-
-    else if (currentWeather === "foggy") {
-
-        weatherStatus.innerHTML = "🌫️ Fog Alert: Low Visibility!";
-        weatherDetails.innerHTML = "Fog detected. Traffic speed is reduced by 55%. Drive carefully.";
-        weatherStatus.style.background = "#fee2e2";
-        weatherStatus.style.color = "#991b1b";
-
-    }
-
-    updateDashboardStats();
 
 });
